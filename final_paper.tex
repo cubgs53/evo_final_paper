@@ -1,0 +1,373 @@
+%!TEX program = xelatex
+
+\documentclass{acm_proc_article-sp}
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\begin{document}
+
+\title{Evolutionary Algorithms for the Induction of Decision Trees}
+%
+% You need the command \numberofauthors to handle the 'placement
+% and alignment' of the authors beneath the title.
+%
+% For aesthetic reasons, we recommend 'three authors at a time'
+% i.e. three 'name/affiliation blocks' be placed beneath the title.
+%
+% NOTE: You are NOT restricted in how many 'rows' of
+% "name/affiliations" may appear. We just ask that you restrict
+% the number of 'columns' to three.
+%
+% Because of the available 'opening page real-estate'
+% we ask you to refrain from putting more than six authors
+% (two rows with three columns) beneath the article title.
+% More than six makes the first-page appear very cluttered indeed.
+%
+% Use the \alignauthor commands to handle the names
+% and affiliations for an 'aesthetic maximum' of six authors.
+% Add names, affiliations, addresses for
+% the seventh etc. author(s) as the argument for the
+% \additionalauthors command.
+% These 'additional authors' will be output/set for you
+% without further effort on your part as the last section in
+% the body of your article BEFORE References or any Appendices.
+
+\numberofauthors{2} %  in this sample file, there are a *total*
+% of EIGHT authors. SIX appear on the 'first-page' (for formatting
+% reasons) and the remaining two appear in the \additionalauthors section.
+%
+\author{
+% You can go ahead and credit any number of authors here,
+% e.g. one 'row of three' or two rows (consisting of one row of three
+% and a second row of one, two or three).
+%
+% The command \alignauthor (no curly braces needed) should
+% precede each author name, affiliation/snail-mail address and
+% e-mail address. Additionally, tag each line of
+% affiliation/address with \affaddr, and tag the
+% e-mail address with \email.
+%
+% 1st. author
+\alignauthor
+Ben Shulman\\
+       \affaddr{Cornell University}\\
+       \email{bgs53@corporation.com}
+% 2nd. author
+\alignauthor
+David Stauffer\\
+       \affaddr{Cornell University}\\
+       \email{dms483@cornell.edu}
+}
+
+\maketitle
+\begin{abstract}
+This paper provides a sample of a \LaTeX\ document which conforms to
+the formatting guidelines for ACM SIG Proceedings.
+It complements the document \textit{Author's Guide to Preparing
+ACM SIG Proceedings Using \LaTeX$2_\epsilon$\ and Bib\TeX}. This
+source file has been written with the intention of being
+compiled under \LaTeX$2_\epsilon$\ and BibTeX.
+
+The developers have tried to include every imaginable sort
+of ``bells and whistles", such as a subtitle, footnotes on
+title, subtitle and authors, as well as in the text, and
+every optional component (e.g. Acknowledgments, Additional
+Authors, Appendices), not to mention examples of
+equations, theorems, tables and figures.
+
+To make best use of this sample document, run it through \LaTeX\
+and BibTeX, and compare this source code with the printed
+output produced by the dvi file.
+\end{abstract}
+
+\section{Introduction}
+
+Decision Trees are a data structure that describe a function that maps input examples to a label. Thus decision trees are a type of classifier. In particular at each node of the decision tree a comparison is made which compares an attribute of the example being classified. Depending on the result of that comparison the tree then makes another comparison or classifies the example. Thus the tree recursively sorts an example until a leaf is reached, at which point the example is classified. Nodes within the tree are comparisons while leafs are labels for examples.
+
+One major class of machine learning algorithms are those that induct decision trees for a problem. These algorithms take a training set of examples, which have known labels, and constructs a decision tree (or trees) that performs well on the training set, with the idea that it will perform well on new un-seen examples. The most common method for creating decision trees is top-down induction of decision trees, which is a recursive greedy strategy. ID3 and C4.5 are examples of algorithms that generate trees in this way. In particular ID3 and C4.5 use information gain on the training set to select the best attribute to split on at each node, and then continues recursively to generate each subtree. Another example is random forests, which is a technique in which a set of a decision trees are created that then each label an example and the final label is determined by vote.
+
+A problem with the traditional greedy algorithms is that greedy search leads them to search only a small area of the search space of decision trees (which is infinite) and thus can easily lead the algorithm into local optima. (TODO CITATION)
+
+Evolutionary algorithms could be a more effective way to search the space of decision trees and produce a better performing tree than established algorithms such as random trees, random forests and C4.5. We will show that simple evolutionary algorithms can outperform random search as well as random mutation hillclimber with random restarts on training data and test data for a data set where the goal is to predict if the example earns less than or more than fifty thousand dollars a year. Further we will show that age-size-fitness pareto evolutionary algorithms improve faster than a basic evolutionary algorithm. Further we show that on average the basic evolutionary algorithm as well as pareto age-size-fitness evolutionary algorithm outperform random tree, random forest and C4.5 algorithms on the previously mentioned dataset.
+
+\section{Problem Definition}
+
+In this paper we will describe algorithms that use training data from an adult data set describing information about adults in the United States, and with labels of if their income is less than or greater than 50 thousand dollars a year to produce a decision tree. The resulting decision tree should perform well on the training data as well as test data, drawn from the same data set.
+
+\section{Methods}
+
+\subsection{Algorithms Overviews}
+
+\subsubsection{Random Search}
+
+This baseline algorithm generates a random solution and then evaluates it, until the stopping conditions are met (some number of evaluations).
+
+\subsubsection{Random Mutation Hillclimber with Restarts}
+
+This baseline algorithm generates a solution and then mutates it repeatedly. If after 5000 generations the solution has not improved, the algorithm restarts with a new random solution. This continues until stopping conditions are met.
+
+\subsubsection{Basic Genetic Algorithm}
+
+This algorithm generates a random initial population of size 100. It then selects parents to perform crossover on to create a set of children. The resulting children and the top 10 from the previous generation are kept and mutated to create the resulting generation. This is then repeated until stopping conditions are met.
+
+\subsubsection{Pareto Genetic Algorithm}
+
+This algorithm generates a random initial population of size 100. It then generates the pareto front of the population over whatever fitness functions are being assessed. Children are then generated from the entire previous population and combined with the un-dominated pareto front as well as a couple new completely random individuals to create the next generation. The size of the population is kept constant at 100 by taking the entire pareto front, up to 50 individuals and then filling in the rest with children and a couple random individuals. If there are more than 50 individuals on the pareto front then the front is randomly thinned to 50 individuals. In practice we never say the front exceed 50. This procedure is then repeated until stopping conditions are met.
+
+\subsection{Representation}
+
+To represent an individual tree in our population we use a binary tree. The tree is implemented in python using a dictionary. This representation is useful because it is not a fixed length, and thus allows us to do genetic programming. Further, it is a direct representation of the kind of solution we are trying to induce, a decision tree.
+
+\subsection{Fitness}
+
+Fitness was measured as the proportion (0-1) of errors made on the training data. Thus our algorithms sought to minimize training error.
+
+\subsection{Random Solution Generation}
+
+Random solutions are generated by recursively randomly choosing whether to create a node or a leaf. If a node is chosen then a recursive call is made to generate the left and right subtrees, then the node is created by randomly choosing an attribute to compare and then choosing the value to compare it against. Leafs are generated by simply choosing a random label for the leaf to assign when an example reaches it.
+
+\subsection{Selection}
+
+For selection in our basic genetic algorithm we began by implementing both tournament selection and elitism selection. We then tested both selection techniques and empirically found them to perform very similarly on our data sets and thus chose to use the simpler elitism selection.
+
+\subsection{Crossover}
+
+For our crossover variation operator we chose to use a sub-tree crossover. The two parents selected for crossover each had a random sub-tree chosen and then those two subtrees were swapped to create two children. Sub-tree swapping makes sense because some sub-trees will perform well regardless of the data that reaches them because they accurately classify the problem in general. Thus when swapping sub-trees structure is not likely to be destroyed.
+
+\subsection{Mutations}
+
+We chose four separate mutations on decision trees. Each had an independent chance of occurring (0.2).
+
+\subsubsection{Attribute Comparison Change}
+
+This mutation selected a random node within the tree and changed which attribute was being compared. For instance if $age$ was being compared at a node, it might be switched to $race$.
+
+\subsubsection{Value Comparison Change}
+
+This mutation selected a random node within the tree and change the value being compared. For instance if the comparison was $age>=25.2$ it might change to $age>=25.4$ if the attribute was numeric. If the comparison was \\ $\text{native-country} = \text{United-States}$ it might become \\ $\text{native-country} = \text{Poland}$ if the attribute was categorical.
+
+\subsubsection{Replace Subtree}
+
+This mutation selected a random subtree in the tree and replaced it with a leaf which assigned a label.
+
+\subsubsection{Change Leaf Class}
+
+This mutation selected a random leaf in the tree and changed the label it assigned to a different label.
+
+\subsection{Diversity}
+
+In order to maintain diversity we used age as a criteria for two of our pareto-based genetic algorithms. Age of a child was calculated as the maximum of its two parents (TODO CITATION)
+
+\section{Related Work}
+
+TODO
+
+\section{Architecture \& Implementation}
+
+Our system was written entirely in Python. Main algorithms (search, hillclimber and genetic algorithms) were implemented as templates that then took fitness functions, selection functions, mutation functions, and crossover functions. They also took train and test sets, train sets were used in the actual algorithm for measuring fitness while the test set was used to record performance of the algorithms at various points. The algorithms would then record train and test set accuracies of the best tree at various points and return that data along with diversity data (genetic algorithms) and the best overall tree after the algorithm was finished. Thus we could easily switch out various pieces of our algorithms without overhauling entire algorithms. baseline functions were placed in \texttt{baseline.py}, and genetic algorithms in \texttt{genetic.py}, utility functions, all our mutation/crossover/etc. functions and constants were placed in \texttt{utils.py}
+
+Our test harness (\texttt{run\_algorithms.py}) was set up to run algorithms for many runs across many cores and then take the returned data and write it to files. We then had code (\texttt{process\_data.py}) which processed the resulting data to give aggregate data for our analysis and graphing.
+
+Our data was taken from UIC (TODO CITATION) and then manually converted to ARFF format. Our algorithms worked off the ARFF format. We also manually used WEKA to generate results for established decision tree algorithms.
+
+\section{Experimental Evaluation}
+
+\subsection{Methodology}
+
+To assess the performance of our algorithms we measured their average training error, average test error, diversity and average final best tree size on two data sets. All data was calculated over 10 runs of each algorithm at various number of evaluations between 1 and 1.5 million, except tree size which was calculated from the best tree at the end of each run. Average training error is the proportion of training examples incorrectly labeled and average test error is the proportion of test examples incorrectly labeled. Test error calculations were not used by the algorithms, they were simply a side effect for data collection.
+
+Diversity was calculated for our genetic algorithms, those which maintained a population. Diversity was measured as the variance in the metric: $\frac{depth}{size}$ for the population.
+
+We compared six of our own algorithms: random search, random mutation hillclimber with restarts (RMHC-RR); basic genetic algorithm (basic genetic); a pareto front genetic algorithm with training error, tree size, and tree age as objectives (Pareto ESA); a pareto front genetic algorithm with training error, and tree size (Pareto ES); and a pareto front genetic algorithm with training error, and tree age as objectives (Pareto EA).
+
+To compare these algorithms against established decision tree algorithms we compared the average final statistics (training error, test error, average best tree size) of our algorithms against the training error, test error and tree size of Weka's (TODO CITATION) implementation of random trees, random forests and C4.5.
+
+The first dataset we used is the Iris dataset (TODO CITATION), a well-known dataset of 150 (50 of each species) Iris flowers. Each example has four attributes: petal length and width along with sepal length and width. The label for each example is the species of the example. We do not include results of our algorithms on this dataset because we used it as our simple dataset to make sure our algorithms could solve easy problems. Thus the results are not particularly interesting as all approaches were successful in classification.
+
+The second, more interesting dataset, is the adult dataset (TODO CITATION), a large data set of nearly 49,000 instances. Each instance is an adult, with the label being whether the person makes over \$50,000 a year, or less than or equal to that. Attributes for the dataset include age, workclass, race, capital-gain, sex, etc. All of the results presented below are calculated using this dataset.
+
+\subsection{Results}
+
+\subsubsection{Training Error}
+
+\begin{figure*}[h]
+\centering
+\includegraphics[width=\linewidth]{train_chart.eps}
+\caption{Training error vs number of evaluations}
+\end{figure*}
+
+As can be seen in \
+
+\subsubsection{Test Error}
+
+\begin{figure*}[h]
+\centering
+\includegraphics[width=\linewidth]{test_chart.eps}
+\caption{Test error vs number of evaluations}
+\end{figure*}
+
+\subsection{Error versus Algorithms}
+
+\begin{figure*}[h]
+\centering
+\includegraphics[width=\linewidth]{error_comparison_chart.eps}
+\caption{Test error vs number of evaluations}
+\end{figure*}
+
+\subsubsection{Tree Size}
+
+\begin{figure*}[h]
+\centering
+\includegraphics[width=\linewidth]{size_chart.eps}
+\caption{Tree size for various algorithms}
+\end{figure*}
+
+
+\subsubsection{Diversity}
+
+\begin{figure*}[h]
+\centering
+\includegraphics[width=\linewidth]{diversity_chart.eps}
+\caption{Diversity measurement vs number of evaluations for our genetic algorithms}
+\end{figure*}
+
+\subsection{Discussion}
+
+
+
+\section{Future Work}
+
+We spent time working on a variation of our basic genetic algorithm that performs co-evolution on the data used for fitness evaluation. We tried several techniques in which fitness of samples was the average accuracy of trees on the sample (minimizing accuracy) as well as the variance in the accuracy of trees on the sample. We did not have success with either approach so did not include the results in this paper; however, we believe co-evolution is still a promising area for improving our algorithms for inducing decision trees.
+
+A second area we are looking into is extending our algorithms to instead generate forests, either through some subset of the population or by accumulating dissimilar trees over the course of the algorithms and then using this resulting forest to increase perform on test data. This may be particularly applicable to pareto front versions of our algorithms that use the best overall pareto front as the final forest.
+
+\section{Conclusion}
+\section{References}
+\section{Acknowledgements}
+\section{Appendix}
+
+
+The \textit{proceedings} are the records of a conference.
+ACM seeks to give these conference by-products a uniform,
+high-quality appearance.  To do this, ACM has some rigid
+requirements for the format of the proceedings documents: there
+is a specified format (balanced  double columns), a specified
+set of fonts (Arial or Helvetica and Times Roman) in
+certain specified sizes (for instance, 9 point for body copy),
+a specified live area (18 $\times$ 23.5 cm [7" $\times$ 9.25"]) centered on
+the page, specified size of margins (1.9 cm [0.75"]) top, (2.54 cm [1"]) bottom
+and (1.9 cm [.75"]) left and right; specified column width
+(8.45 cm [3.33"]) and gutter size (.83 cm [.33"]).
+
+The good news is, with only a handful of manual
+settings\footnote{Two of these, the {\texttt{\char'134 numberofauthors}}
+and {\texttt{\char'134 alignauthor}} commands, you have
+already used; another, {\texttt{\char'134 balancecolumns}}, will
+be used in your very last run of \LaTeX\ to ensure
+balanced column heights on the last page.}, the \LaTeX\ document
+class file handles all of this for you.
+
+The remainder of this document is concerned with showing, in
+the context of an ``actual'' document, the \LaTeX\ commands
+specifically available for denoting the structure of a
+proceedings paper, rather than with giving rigorous descriptions
+or explanations of such commands.
+
+\section{The {\secit Body} of The Paper}
+Typically, the body of a paper is organized
+into a hierarchical structure, with numbered or unnumbered
+headings for sections, subsections, sub-subsections, and even
+smaller sections.  The command \texttt{{\char'134}section} that
+precedes this paragraph is part of such a
+hierarchy.\footnote{This is the second footnote.  It
+starts a series of three footnotes that add nothing
+informational, but just give an idea of how footnotes work
+and look. It is a wordy one, just so you see
+how a longish one plays out.} \LaTeX\ handles the numbering
+and placement of these headings for you, when you use
+the appropriate heading commands around the titles
+of the headings.  If you want a sub-subsection or
+smaller part to be unnumbered in your output, simply append an
+asterisk to the command name.  Examples of both
+numbered and unnumbered headings will appear throughout the
+balance of this sample document.
+
+Because the entire article is contained in
+the \textbf{document} environment, you can indicate the
+start of a new paragraph with a blank line in your
+input file; that is why this sentence forms a separate paragraph.
+
+\subsection{Type Changes and {\subsecit Special} Characters}
+We have already seen several typeface changes in this sample.  You
+can indicate italicized words or phrases in your text with
+the command \texttt{{\char'134}textit}; emboldening with the
+command \texttt{{\char'134}textbf}
+and typewriter-style (for instance, for computer code) with
+\texttt{{\char'134}texttt}.  But remember, you do not
+have to indicate typestyle changes when such changes are
+part of the \textit{structural} elements of your
+article; for instance, the heading of this subsection will
+be in a sans serif\footnote{A third footnote, here.
+Let's make this a rather short one to
+see how it looks.} typeface, but that is handled by the
+document class file. Take care with the use
+of\footnote{A fourth, and last, footnote.}
+the curly braces in typeface changes; they mark
+the beginning and end of
+the text that is to be in the different typeface.
+
+You can use whatever symbols, accented characters, or
+non-English characters you need anywhere in your document;
+you can find a complete list of what is
+available in the \textit{\LaTeX\
+User's Guide}\cite{Lamport:LaTeX}.
+
+\subsection{Citations}
+Citations to articles \cite{bowman:reasoning, clark:pct, braams:babel, herlihy:methodology},
+conference
+proceedings \cite{clark:pct} or books \cite{salas:calculus, Lamport:LaTeX} listed
+in the Bibliography section of your
+article will occur throughout the text of your article.
+You should use BibTeX to automatically produce this bibliography;
+you simply need to insert one of several citation commands with
+a key of the item cited in the proper location in
+the \texttt{.tex} file \cite{Lamport:LaTeX}.
+The key is a short reference you invent to uniquely
+identify each work; in this sample document, the key is
+the first author's surname and a
+word from the title.  This identifying key is included
+with each item in the \texttt{.bib} file for your article.
+
+The details of the construction of the \texttt{.bib} file
+are beyond the scope of this sample document, but more
+information can be found in the \textit{Author's Guide},
+and exhaustive details in the \textit{\LaTeX\ User's
+Guide}\cite{Lamport:LaTeX}.
+
+This article shows only the plainest form
+of the citation command, using \texttt{{\char'134}cite}.
+This is what is stipulated in the SIGS style specifications.
+No other citation format is endorsed.
+
+%
+% The following two commands are all you need in the
+% initial runs of your .tex file to
+% produce the bibliography for the citations in your paper.
+\bibliographystyle{abbrv}
+\bibliography{sigproc}  % sigproc.bib is the name of the Bibliography in this case
+% You must have a proper ".bib" file
+%  and remember to run:
+% latex bibtex latex latex
+% to resolve all references
+%
+% ACM needs 'a single self-contained file'!
+%
+%APPENDICES are optional
+%\balancecolumns
+\appendix
+%Appendix A
+\section{Headings in Appendices}
+\balancecolumns
+% That's all folks!
+\end{document}
