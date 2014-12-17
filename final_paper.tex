@@ -62,23 +62,7 @@ David Stauffer\\
 
 \maketitle
 \begin{abstract}
-This paper provides a sample of a \LaTeX\ document which conforms to
-the formatting guidelines for ACM SIG Proceedings.
-It complements the document \textit{Author's Guide to Preparing
-ACM SIG Proceedings Using \LaTeX$2_\epsilon$\ and Bib\TeX}. This
-source file has been written with the intention of being
-compiled under \LaTeX$2_\epsilon$\ and BibTeX.
-
-The developers have tried to include every imaginable sort
-of ``bells and whistles", such as a subtitle, footnotes on
-title, subtitle and authors, as well as in the text, and
-every optional component (e.g. Acknowledgments, Additional
-Authors, Appendices), not to mention examples of
-equations, theorems, tables and figures.
-
-To make best use of this sample document, run it through \LaTeX\
-and BibTeX, and compare this source code with the printed
-output produced by the dvi file.
+We show that evolutionary algorithms can be effectively used for decision tree induction. Decision tree induction is the creation of a tree which represents a function which takes an example with specific attributes and returns a label, or class, for the example. In this paper we show how simple basic genetic algorithms for decision tree induction can outperform random trees as well as random forests along with baseline optimization algorithms such as random-mutation hillclimber and random search. We present a Pareto-based genetic algorithm which uses training error, tree size and tree age to induce decision trees that outperform standard greedy algorithms such as C4.5, as well as random forests, random mutation hillclimber and random search. Finally we provide a discussion of why age and size together can control for overfitting in Pareto-based strategies as well as tree simplicity and generalizability. We end this paper by discussing how our algorithms could be extended to potentially create more accurate and generalizable classifiers through co-evolution, and forests.
 \end{abstract}
 
 \section{Introduction}
@@ -87,13 +71,13 @@ Decision Trees are a data structure that describe a function that maps input exa
 
 One major class of machine learning algorithms are those that induct decision trees for a problem. These algorithms take a training set of examples, which have known labels, and constructs a decision tree (or trees) that performs well on the training set, with the idea that it will perform well on new un-seen examples. The most common method for creating decision trees is top-down induction of decision trees, which is a recursive greedy strategy. ID3 and C4.5 are examples of algorithms that generate trees in this way. In particular ID3 and C4.5 use information gain on the training set to select the best attribute to split on at each node, and then continues recursively to generate each subtree. Another example is random forests, which is a technique in which a set of a decision trees are created that then each label an example and the final label is determined by vote.
 
-A problem with the traditional greedy algorithms is that greedy search leads them to search only a small area of the search space of decision trees (which is infinite) and thus can easily lead the algorithm into local optima. (TODO CITATION)
+A problem with the traditional greedy algorithms is that greedy search leads them to search only a small area of the search space of decision trees (which is infinite) and thus can easily lead the algorithm into local optima \cite{barros2012}.
 
 Evolutionary algorithms could be a more effective way to search the space of decision trees and produce a better performing tree than established algorithms such as random trees, random forests and C4.5. We will show that simple evolutionary algorithms can outperform random search as well as random mutation hillclimber with random restarts on training data and test data for a data set where the goal is to predict if the example earns less than or more than fifty thousand dollars a year. Further we will show that age-size-fitness pareto evolutionary algorithms improve faster than a basic evolutionary algorithm. Further we show that on average the basic evolutionary algorithm as well as pareto age-size-fitness evolutionary algorithm outperform random tree, random forest and C4.5 algorithms on the previously mentioned dataset.
 
 \section{Problem Definition}
 
-In this paper we will describe algorithms that use training data from an adult data set describing information about adults in the United States, and with labels of if their income is less than or greater than 50 thousand dollars a year to produce a decision tree. The resulting decision tree should perform well on the training data as well as test data, drawn from the same data set.
+In this paper we will describe algorithms that use training data from an adult data set describing information about adults in the United States, and with labels of if their income is less than or greater than 50 thousand dollars a year to produce a decision tree. A more detailed description of the data set can be found in the experimental evaluation section. The resulting decision tree should perform well on the training data as well as test data, drawn from the same data set.
 
 \section{Methods}
 
@@ -113,7 +97,7 @@ This algorithm generates a random initial population of size 100. It then select
 
 \subsubsection{Pareto Genetic Algorithm}
 
-This algorithm generates a random initial population of size 100. It then generates the pareto front of the population over whatever fitness functions are being assessed. Children are then generated from the entire previous population and combined with the un-dominated pareto front as well as a couple new completely random individuals to create the next generation. The size of the population is kept constant at 100 by taking the entire pareto front, up to 50 individuals and then filling in the rest with children and a couple random individuals. If there are more than 50 individuals on the pareto front then the front is randomly thinned to 50 individuals. In practice we never say the front exceed 50. This procedure is then repeated until stopping conditions are met.
+This algorithm generates a random initial population of size 100. It then generates the pareto front of the population over whatever fitness functions are being assessed. Children are then generated from the entire previous population and combined with the un-dominated pareto front as well as a couple new completely random individuals to create the next generation. The size of the population is kept constant at 100 by taking the entire pareto front, up to 50 individuals and then filling in the rest with children and a couple random individuals. If there are more than 50 individuals on the pareto front then the front is randomly thinned to 50 individuals. In practice we never saw the front exceed 50. This procedure is then repeated until stopping conditions are met.
 
 \subsection{Representation}
 
@@ -129,7 +113,7 @@ Random solutions are generated by recursively randomly choosing whether to creat
 
 \subsection{Selection}
 
-For selection in our basic genetic algorithm we began by implementing both tournament selection and elitism selection. We then tested both selection techniques and empirically found them to perform very similarly on our data sets and thus chose to use the simpler elitism selection.
+For selection in our basic genetic algorithm we began by implementing both tournament selection and rank-based selection. We then tested both selection techniques and empirically found them to perform very similarly on our data sets and thus chose to use the simpler rank-based selection.
 
 \subsection{Crossover}
 
@@ -157,19 +141,23 @@ This mutation selected a random leaf in the tree and changed the label it assign
 
 \subsection{Diversity}
 
-In order to maintain diversity we used age as a criteria for two of our pareto-based genetic algorithms. Age of a child was calculated as the maximum of its two parents (TODO CITATION)
+In order to maintain diversity we used age as a criteria for two of our pareto-based genetic algorithms. Age of a child was calculated as the maximum of its two parents, as done in \cite{schmidt2011}.
 
 \section{Related Work}
 
-TODO
+Much work has been done on using evolutionary algorithms for the induction of decision trees \cite{barros2012}. Barros et al. (2012) surveys the work that has been done on decision trees and evolutionary algorithms. There are numerous examples of papers which have done work similar to ours, in particular inducing decision trees which are binary, single-attribute comparisons and designed for classification \cite{barros2012}. Many of these papers use similar methods as we have used, however, most that have focused on multi-objective fitness have used weighting techniques rather while only a few have used Pareto front optimization. Further, none (to the authors' knowledges) have considered age as an objective, as we do in our work. As we will show, age is an important factor that when combined with training error and tree size can greatly improve performance. In particular we use age to help maintain diversity and reduce overfitting, an approach which has not been previously done to our knowledge.
+
+Because there is such a large body of work on evolutionary algorithms and decision trees, there is a wide variety of selection, mutation, and crossover operators that have been used. We employ the use of mutation methods similar to many papers cited in \cite{barros2012}. Our crossover operator is the most commonly used operator for genetic programming based algorithms for decision trees, the subtree swap. Finally, we chose to use rank based selection which is one of the least common methods for selection in evolutionary algorithms for decision tree induction.
+
+In terms of our approach to pareto genetic algorithms, we take age-fitness pareto algorithms from \cite{schmidt2011}. However, we extend this age-fitness approach for diversity with a third objective, size, to try to select for more simple, generalizable solutions.
 
 \section{Architecture \& Implementation}
 
-Our system was written entirely in Python. Main algorithms (search, hillclimber and genetic algorithms) were implemented as templates that then took fitness functions, selection functions, mutation functions, and crossover functions. They also took train and test sets, train sets were used in the actual algorithm for measuring fitness while the test set was used to record performance of the algorithms at various points. The algorithms would then record train and test set accuracies of the best tree at various points and return that data along with diversity data (genetic algorithms) and the best overall tree after the algorithm was finished. Thus we could easily switch out various pieces of our algorithms without overhauling entire algorithms. baseline functions were placed in \texttt{baseline.py}, and genetic algorithms in \texttt{genetic.py}, utility functions, all our mutation/crossover/etc. functions and constants were placed in \texttt{utils.py}
+Our system was written entirely in Python. Main algorithms (search, hillclimber and genetic algorithms) were implemented as templates that then took fitness functions, selection functions, mutation functions, and crossover functions. They also took train and test sets, train sets were used in the actual algorithm for measuring fitness while the test set was used to record performance of the algorithms at various points. The algorithms would then record train and test set accuracies of the best tree at various points and return that data along with diversity data (genetic algorithms) and the best overall tree after the algorithm was finished. Thus we could easily switch out various pieces of our algorithms without overhauling the entire algorithm. baseline functions were placed in \texttt{baseline.py}, and genetic algorithms in \texttt{genetic.py}, utility functions, all our mutation/crossover/etc. functions and constants were placed in \texttt{utils.py}
 
 Our test harness (\texttt{run\_algorithms.py}) was set up to run algorithms for many runs across many cores and then take the returned data and write it to files. We then had code (\texttt{process\_data.py}) which processed the resulting data to give aggregate data for our analysis and graphing.
 
-Our data was taken from UIC (TODO CITATION) and then manually converted to ARFF format. Our algorithms worked off the ARFF format. We also manually used WEKA to generate results for established decision tree algorithms.
+Our data was taken from UCI \cite{Bache+Lichman:2013} and then manually converted to ARFF format. Our algorithms worked off the ARFF format. We also manually used Weka \cite{Hall:2009} to generate results for established decision tree algorithms.
 
 \section{Experimental Evaluation}
 
@@ -181,11 +169,11 @@ Diversity was calculated for our genetic algorithms, those which maintained a po
 
 We compared six of our own algorithms: random search, random mutation hillclimber with restarts (RMHC-RR); basic genetic algorithm (basic genetic); a pareto front genetic algorithm with training error, tree size, and tree age as objectives (Pareto ESA); a pareto front genetic algorithm with training error, and tree size (Pareto ES); and a pareto front genetic algorithm with training error, and tree age as objectives (Pareto EA).
 
-To compare these algorithms against established decision tree algorithms we compared the average final statistics (training error, test error, average best tree size) of our algorithms against the training error, test error and tree size of Weka's (TODO CITATION) implementation of random trees, random forests and C4.5.
+To compare these algorithms against established decision tree algorithms we compared the average final statistics (training error, test error, average best tree size) of our algorithms against the training error, test error and tree size of Weka's \cite{Hall:2009} implementation of random trees, random forests and C4.5.
 
-The first dataset we used is the Iris dataset (TODO CITATION), a well-known dataset of 150 (50 of each species) Iris flowers. Each example has four attributes: petal length and width along with sepal length and width. The label for each example is the species of the example. We do not include results of our algorithms on this dataset because we used it as our simple dataset to make sure our algorithms could solve easy problems. Thus the results are not particularly interesting as all approaches were successful in classification.
+The first dataset we used is the Iris dataset, available from the UCI Machine Learning repository \cite{Bache+Lichman:2013}, a well-known dataset of 150 (50 of each species) Iris flowers. Each example has four attributes: petal length and width along with sepal length and width. The label for each example is the species of the example. We do not include results of our algorithms on this dataset because we used it as our simple dataset to make sure our algorithms could solve easy problems. Thus the results are not particularly interesting as all approaches were successful in classification.
 
-The second, more interesting dataset, is the adult dataset (TODO CITATION), a large data set of nearly 49,000 instances. Each instance is an adult, with the label being whether the person makes over \$50,000 a year, or less than or equal to that. Attributes for the dataset include age, workclass, race, capital-gain, sex, etc. All of the results presented below are calculated using this dataset.
+The second, more interesting dataset, is the adult dataset, available from the UCI Machine Learning repository \cite{Bache+Lichman:2013}, a large data set of nearly 49,000 instances. Each instance is an adult, with the label being whether the person makes over \$50,000 a year, or less than or equal to that. Attributes for the dataset include age, workclass, race, capital-gain, sex, etc. All of the results presented below are calculated using this dataset.
 
 \subsection{Results}
 
@@ -237,7 +225,7 @@ In \hyperref[algorithms]{Figure 4} we compare how the average train/test error o
 \caption{Tree size for various algorithms}\label{size}
 \end{figure*}
 
-\hyperref[size]{Figure 5}, shows how the average size of the best tree created by each run of our algorithms and baselines as compared to established decision tree algorithms. All our Pareto algorithms created trees that were much smaller than the one created by C4.5 (size 173). In particular Pareto ESA, and Pareto ES produced small trees on average. the tree produced by Weka's random tree algorithm was huge, with size over 5000. Basic genetic, creates trees of similar size as C4.5, but slightly larger on average (184 for basic genetic).
+\hyperref[size]{Figure 5}, shows how the average size of the best tree created by each run of our algorithms and baselines as compared to established decision tree algorithms. All our Pareto algorithms created trees that were much smaller than the one created by C4.5 (size 173). In particular Pareto ESA, and Pareto ES produced small trees on average. the tree produced by Weka's \cite{Hall:2009} random tree algorithm was huge, with size over 5000. Basic genetic, creates trees of similar size as C4.5, but slightly larger on average (184 for basic genetic).
 
 \subsubsection{Diversity}
 
@@ -259,119 +247,39 @@ Our basic genetic algorithm, however, does not create trees that perform as well
 
 However, both basic genetic and our pareto genetic algorithms performed well, indicating that there are structural patterns within our representation and in decision trees in general that can be exploited via our mutation operators as well as through subtree swapping (our crossover operator) that are not exploited by C4.5 and similar algorithms. C4.5 instead exploits patterns and information within the training data, which may be a reason that there appears to be more overfitting in established algorithms as compared to our algorithms which use the tree structure itself.
 
+In terms of diversity our pareto algorithms easily beat out our basic genetic. We believe this is primarily due to the fact we include a couple new random individuals in each generation which helps maintain a diverse population in our pareto variants. However, including both age and size as objectives in pareto algorithms also are likely to have helped. This is likely due because age explicitly selects for younger solutions, thus including solutions closer to age 0 random solutions. Size may also select for solutions that are of variant $\frac{depth}{size}$ because size is a factor in how we determine this diversity score.
+
 \section{Future Work}
+An easy way to improve our current algorithms would be parameter tuning. Different mutation rates could be tested or even made variable through the algrithm run, as could crossover rates. Different selection operators (i.e. using a crowding analysis on the pareto layers) would also likely improve convergence.
 
-We spent time working on a variation of our basic genetic algorithm that performs co-evolution on the data used for fitness evaluation. We tried several techniques in which fitness of samples was the average accuracy of trees on the sample (minimizing accuracy) as well as the variance in the accuracy of trees on the sample. We did not have success with either approach so did not include the results in this paper; however, we believe co-evolution is still a promising area for improving our algorithms for inducing decision trees.
+We spent time working on a variation of our basic genetic algorithm that performs co-evolution on the data used for fitness evaluation. We tried several techniques in which fitness of samples was the average accuracy of trees on the sample (minimizing accuracy) as well as the variance in the accuracy of trees on the sample. We did not have success with either approach so did not include the results in this paper; however, we still believe co-evolution is a promising area for improving our algorithms.
 
-A second area we are looking into is extending our algorithms to instead generate forests, either through some subset of the population or by accumulating dissimilar trees over the course of the algorithms and then using this resulting forest to increase perform on test data. This may be particularly applicable to pareto front versions of our algorithms that use the best overall pareto front as the final forest.
+A second area we are looking into is extending our algorithms to generate forests, either through some subset of the population or by accumulating dissimilar trees over the course of the algorithm run and then using this resulting forest to increase performance on test data. This may be particularly applicable to pareto front versions of our algorithms that use the best overall pareto front as the final forest, or some subset of the front.
+
+Finally, using a larger variety of data sets to compare our algorithms to C4.5 and random searches would clarify the performance differences and advantages of each method. Especially on difficult to classify data with error rates nearer $\frac{1}{2}$, we expect a genetic algorithm could outperform C4.5 and related algorithms because it searches through a much larger range of the solution space.
 
 \section{Conclusion}
-\section{References}
+
+On the adult data set, our Pareto ESA algorithm outperformed all baselines and established algorithms (in particular, C4.5). Not only did it have lower test error but it created a significantly smaller tree and avoided overfitting the training data to the extent of other algorithms. This emphasizes the advantages of including a Pareto strategy into a genetic algorithm to maintain diversity and develop multiple approaches to the same problem. More generally, the results demonstrate the ability of genetic programming to construct accurate, generalizable decision trees.
+
+While our algorithms could use some optimization and parameter tuning, there were no major failures of the Pareto approach. In creating a solution superior to C4.5 in every metric, the Pareto ESA certainly surpassed expectations.
+
+Since our Pareto ESA algorithm tends to create much smaller trees than C4.5, it actually runs significantly faster on the test data. Given slightly superior error, once created our genetic trees will work much more quickly and more accurately than a C4.5 solution on a large data set. Harder problems might increase this difference. Thus, our results demonstrate the utility of a genetic programming approach to decision tree induction and may spur further investigation into these types of problems.
+
 \section{Acknowledgements}
+
+We would like to acknowledge Professor Hod Lipson, who provided guidance and advice on this project. We would also like to note that we used the Python package, numpy, for much of our computation and the graphing package, Dot, to produce visualizations of our trees.
+
 \section{Appendix}
 
-
-The \textit{proceedings} are the records of a conference.
-ACM seeks to give these conference by-products a uniform,
-high-quality appearance.  To do this, ACM has some rigid
-requirements for the format of the proceedings documents: there
-is a specified format (balanced  double columns), a specified
-set of fonts (Arial or Helvetica and Times Roman) in
-certain specified sizes (for instance, 9 point for body copy),
-a specified live area (18 $\times$ 23.5 cm [7" $\times$ 9.25"]) centered on
-the page, specified size of margins (1.9 cm [0.75"]) top, (2.54 cm [1"]) bottom
-and (1.9 cm [.75"]) left and right; specified column width
-(8.45 cm [3.33"]) and gutter size (.83 cm [.33"]).
-
-The good news is, with only a handful of manual
-settings\footnote{Two of these, the {\texttt{\char'134 numberofauthors}}
-and {\texttt{\char'134 alignauthor}} commands, you have
-already used; another, {\texttt{\char'134 balancecolumns}}, will
-be used in your very last run of \LaTeX\ to ensure
-balanced column heights on the last page.}, the \LaTeX\ document
-class file handles all of this for you.
-
-The remainder of this document is concerned with showing, in
-the context of an ``actual'' document, the \LaTeX\ commands
-specifically available for denoting the structure of a
-proceedings paper, rather than with giving rigorous descriptions
-or explanations of such commands.
-
-\section{The {\secit Body} of The Paper}
-Typically, the body of a paper is organized
-into a hierarchical structure, with numbered or unnumbered
-headings for sections, subsections, sub-subsections, and even
-smaller sections.  The command \texttt{{\char'134}section} that
-precedes this paragraph is part of such a
-hierarchy.\footnote{This is the second footnote.  It
-starts a series of three footnotes that add nothing
-informational, but just give an idea of how footnotes work
-and look. It is a wordy one, just so you see
-how a longish one plays out.} \LaTeX\ handles the numbering
-and placement of these headings for you, when you use
-the appropriate heading commands around the titles
-of the headings.  If you want a sub-subsection or
-smaller part to be unnumbered in your output, simply append an
-asterisk to the command name.  Examples of both
-numbered and unnumbered headings will appear throughout the
-balance of this sample document.
-
-Because the entire article is contained in
-the \textbf{document} environment, you can indicate the
-start of a new paragraph with a blank line in your
-input file; that is why this sentence forms a separate paragraph.
-
-\subsection{Type Changes and {\subsecit Special} Characters}
-We have already seen several typeface changes in this sample.  You
-can indicate italicized words or phrases in your text with
-the command \texttt{{\char'134}textit}; emboldening with the
-command \texttt{{\char'134}textbf}
-and typewriter-style (for instance, for computer code) with
-\texttt{{\char'134}texttt}.  But remember, you do not
-have to indicate typestyle changes when such changes are
-part of the \textit{structural} elements of your
-article; for instance, the heading of this subsection will
-be in a sans serif\footnote{A third footnote, here.
-Let's make this a rather short one to
-see how it looks.} typeface, but that is handled by the
-document class file. Take care with the use
-of\footnote{A fourth, and last, footnote.}
-the curly braces in typeface changes; they mark
-the beginning and end of
-the text that is to be in the different typeface.
-
-You can use whatever symbols, accented characters, or
-non-English characters you need anywhere in your document;
-you can find a complete list of what is
-available in the \textit{\LaTeX\
-User's Guide}\cite{Lamport:LaTeX}.
-
-\subsection{Citations}
-Citations to articles \cite{bowman:reasoning, clark:pct, braams:babel, herlihy:methodology},
-conference
-proceedings \cite{clark:pct} or books \cite{salas:calculus, Lamport:LaTeX} listed
-in the Bibliography section of your
-article will occur throughout the text of your article.
-You should use BibTeX to automatically produce this bibliography;
-you simply need to insert one of several citation commands with
-a key of the item cited in the proper location in
-the \texttt{.tex} file \cite{Lamport:LaTeX}.
-The key is a short reference you invent to uniquely
-identify each work; in this sample document, the key is
-the first author's surname and a
-word from the title.  This identifying key is included
-with each item in the \texttt{.bib} file for your article.
-
-The details of the construction of the \texttt{.bib} file
-are beyond the scope of this sample document, but more
-information can be found in the \textit{Author's Guide},
-and exhaustive details in the \textit{\LaTeX\ User's
-Guide}\cite{Lamport:LaTeX}.
-
-This article shows only the plainest form
-of the citation command, using \texttt{{\char'134}cite}.
-This is what is stipulated in the SIGS style specifications.
-No other citation format is endorsed.
+\begin{tabular}{|l|l|}
+\hline
+utils.py & Contains our utility, mutation, crossover, fitness and selection functions. \\
+baseline.py & Contains our baseline algorithms, random search and RMHC-RR. \\
+genetic.py & Contains our genetic algorithms, pareto and basic genetic. \\
+run\_algorithms.py & Contains code used for our test harness and data recording. \\
+process\_data.py & Contains code used for processing recorded data and computing statistics. \\ \hline
+\end{tabular}
 
 %
 % The following two commands are all you need in the
@@ -386,11 +294,6 @@ No other citation format is endorsed.
 %
 % ACM needs 'a single self-contained file'!
 %
-%APPENDICES are optional
-%\balancecolumns
-\appendix
-%Appendix A
-\section{Headings in Appendices}
 \balancecolumns
 % That's all folks!
 \end{document}
